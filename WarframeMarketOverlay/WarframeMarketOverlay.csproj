@@ -154,9 +154,11 @@
     <Compile Include="OptionsForm.Designer.cs">
       <DependentUpon>OptionsForm.cs</DependentUpon>
     </Compile>
+    <Compile Include="ProcessDetection.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Result.cs" />
+    <Compile Include="SystemTrayIcon.cs" />
     <Compile Include="WarframeQueryHandler.cs" />
     <EmbeddedResource Include="GlobalHotkeyListener.resx">
       <DependentUpon>GlobalHotkeyListener.cs</DependentUpon>

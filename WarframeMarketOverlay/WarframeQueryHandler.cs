@@ -7,6 +7,13 @@ using System.Threading.Tasks;
 
 namespace WarframeMarketOverlay
 {
+    class QueryHandlerException : Exception
+    {
+        public QueryHandlerException() { }
+        public QueryHandlerException(string message) : base(message) { }
+        public QueryHandlerException(string message, Exception inner) : base(message, inner) { }
+    }
+
     class WarframeQueryHandler : IDisposable
     {
         private Process screenReader;
@@ -116,8 +123,11 @@ namespace WarframeMarketOverlay
         private void Cleanup()
         {
             KeyPressed = false;
-            client.Dispose(); 
-            client = null;
+            if (client != null)
+            {
+                client.Dispose();
+                client = null;
+            }
             System.Windows.Forms.MessageBox.Show("end");
         }
 
@@ -125,7 +135,15 @@ namespace WarframeMarketOverlay
         {
             KeyPressed = false;
             cancellationTokenSource.Cancel();
-            await Task.WhenAll(tasks);
+            if (tasks != null)
+            {
+                await Task.WhenAll(tasks);
+            }
+            if (client != null)
+            {
+                client.Dispose();
+                client = null;
+            }
             if (screenReader != null)
                 screenReader.Dispose();
             GC.SuppressFinalize(this);
