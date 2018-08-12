@@ -185,6 +185,5 @@ namespace WarframeMarketOverlay
                 processDetector.Start();
             }
         }   //Called when Warframe is closing
-
     }
 }

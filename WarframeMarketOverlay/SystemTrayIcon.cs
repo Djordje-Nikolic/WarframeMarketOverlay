@@ -76,13 +76,19 @@ namespace WarframeMarketOverlay
         public void SetTextSuccess()
         {
             if (systemTrayIcon != null)
+            {
                 systemTrayIcon.Text = "Warframe Market Overlay (Warframe is running)";
+                systemTrayIcon.ShowBalloonTip(5000, System.IO.Path.GetFileNameWithoutExtension(System.Reflection.Assembly.GetEntryAssembly().Location), "Warframe has been detected", ToolTipIcon.Info);
+            }
         }
 
         public void SetTextFailure()
         {
             if (systemTrayIcon != null)
+            {
                 systemTrayIcon.Text = "Warframe Market Overlay (Warframe is not running)";
+                systemTrayIcon.ShowBalloonTip(5000, System.IO.Path.GetFileNameWithoutExtension(System.Reflection.Assembly.GetEntryAssembly().Location), "Warframe has closed", ToolTipIcon.Info);
+            }
         }
 
         private void DonateItem_Click(object sender, EventArgs e)
