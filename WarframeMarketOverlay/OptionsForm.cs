@@ -22,6 +22,7 @@ namespace WarframeMarketOverlay
             checkBoxCtrl.Checked = new int[] { 2, 3, 6, 7, 10, 11, 14, 15 }.Contains(temp);
             checkBoxShift.Checked = new int[] { 4, 5, 6, 7, 12, 13, 14, 15 }.Contains(temp);
             checkBoxWin.Checked = new int[] { 8, 9, 10, 11, 12, 13, 14, 15 }.Contains(temp);
+            checkBoxExit.Checked = Settings.Default.Exit_with_app;
 
             //Check startup settings
             new System.Security.Permissions.RegistryPermission(System.Security.Permissions.PermissionState.Unrestricted).Assert();
@@ -80,6 +81,7 @@ namespace WarframeMarketOverlay
             Enum.TryParse(comboBoxKey.Text, out Keys key);
             Settings.Default.Key_Value = key;
             Settings.Default.Key_Index = comboBoxKey.SelectedIndex;
+            Settings.Default.Exit_with_app = checkBoxExit.Checked;
             Settings.Default.Save();
 
             new System.Security.Permissions.RegistryPermission(System.Security.Permissions.PermissionState.Unrestricted).Assert();

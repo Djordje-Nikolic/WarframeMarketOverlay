@@ -40,12 +40,13 @@
             this.checkBoxCtrl = new System.Windows.Forms.CheckBox();
             this.checkBoxAlt = new System.Windows.Forms.CheckBox();
             this.groupBoxSettings = new System.Windows.Forms.GroupBox();
+            this.checkBoxStartup = new System.Windows.Forms.CheckBox();
             this.buttonConfirm = new System.Windows.Forms.Button();
             this.buttonCancel = new System.Windows.Forms.Button();
             this.buttonUpdate = new System.Windows.Forms.Button();
             this.backgroundWorkerUpdate = new System.ComponentModel.BackgroundWorker();
             this.labelUpdateDone = new System.Windows.Forms.Label();
-            this.checkBoxStartup = new System.Windows.Forms.CheckBox();
+            this.checkBoxExit = new System.Windows.Forms.CheckBox();
             this.groupBoxHotkey.SuspendLayout();
             this.groupBoxSettings.SuspendLayout();
             this.SuspendLayout();
@@ -209,6 +210,7 @@
             // 
             // groupBoxSettings
             // 
+            this.groupBoxSettings.Controls.Add(this.checkBoxExit);
             this.groupBoxSettings.Controls.Add(this.checkBoxStartup);
             this.groupBoxSettings.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(238)));
             this.groupBoxSettings.Location = new System.Drawing.Point(12, 264);
@@ -217,6 +219,16 @@
             this.groupBoxSettings.TabIndex = 1;
             this.groupBoxSettings.TabStop = false;
             this.groupBoxSettings.Text = "Application Settings";
+            // 
+            // checkBoxStartup
+            // 
+            this.checkBoxStartup.AutoSize = true;
+            this.checkBoxStartup.Location = new System.Drawing.Point(49, 36);
+            this.checkBoxStartup.Name = "checkBoxStartup";
+            this.checkBoxStartup.Size = new System.Drawing.Size(198, 24);
+            this.checkBoxStartup.TabIndex = 0;
+            this.checkBoxStartup.Text = "Run at Windows startup";
+            this.checkBoxStartup.UseVisualStyleBackColor = true;
             // 
             // buttonConfirm
             // 
@@ -266,15 +278,15 @@
             this.labelUpdateDone.Size = new System.Drawing.Size(0, 16);
             this.labelUpdateDone.TabIndex = 5;
             // 
-            // checkBoxStartup
+            // checkBoxExit
             // 
-            this.checkBoxStartup.AutoSize = true;
-            this.checkBoxStartup.Location = new System.Drawing.Point(49, 36);
-            this.checkBoxStartup.Name = "checkBoxStartup";
-            this.checkBoxStartup.Size = new System.Drawing.Size(198, 24);
-            this.checkBoxStartup.TabIndex = 0;
-            this.checkBoxStartup.Text = "Run at Windows startup";
-            this.checkBoxStartup.UseVisualStyleBackColor = true;
+            this.checkBoxExit.AutoSize = true;
+            this.checkBoxExit.Location = new System.Drawing.Point(49, 66);
+            this.checkBoxExit.Name = "checkBoxExit";
+            this.checkBoxExit.Size = new System.Drawing.Size(160, 24);
+            this.checkBoxExit.TabIndex = 1;
+            this.checkBoxExit.Text = "Exit with Warframe";
+            this.checkBoxExit.UseVisualStyleBackColor = true;
             // 
             // OptionsForm
             // 
@@ -323,5 +335,6 @@
         private System.ComponentModel.BackgroundWorker backgroundWorkerUpdate;
         private System.Windows.Forms.Label labelUpdateDone;
         private System.Windows.Forms.CheckBox checkBoxStartup;
+        private System.Windows.Forms.CheckBox checkBoxExit;
     }
 }

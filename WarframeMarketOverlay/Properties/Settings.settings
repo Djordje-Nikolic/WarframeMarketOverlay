@@ -11,5 +11,8 @@
     <Setting Name="Key_Index" Type="System.Int32" Scope="User">
       <Value Profile="(Default)">44</Value>
     </Setting>
+    <Setting Name="Exit_with_app" Type="System.Boolean" Scope="User">
+      <Value Profile="(Default)">False</Value>
+    </Setting>
   </Settings>
 </SettingsFile>

@@ -49,6 +49,7 @@ namespace WarframeMarketOverlay
             }
             catch (Exception e)
             {
+                Dispose();
                 throw new ProcessDetectorException("Startup error", e);
             }
         }

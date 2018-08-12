@@ -1,9 +1,7 @@
 ﻿using System;
 using System.Diagnostics;
 using System.Windows.Forms;
-using System.Management;
 using Hotkeys;
-using System.Collections.Generic;
 
 namespace WarframeMarketOverlay
 {
@@ -12,7 +10,7 @@ namespace WarframeMarketOverlay
         private Process warframeProcess;
         private WarframeQueryHandler queryHandler;
         private GlobalHotkey mainTrigger;
-        private SystemTrayIcon trayIcon;
+        private WarframeTrayIcon trayIcon;
         private ProcessDetector processDetector;
 
         public GlobalHotkeyListener()
@@ -35,12 +33,12 @@ namespace WarframeMarketOverlay
 
             try
             {
-                trayIcon = new SystemTrayIcon(this);
+                trayIcon = new WarframeTrayIcon(this);
                 trayIcon.Initialize();
                 processDetector = new ProcessDetector(new string[] { "Notepad", "Notepad.x64" }, WarframeIsRunning);
                 processDetector.Start();
             }
-            catch (SystemTrayIconException a)
+            catch (WarframeTrayIconException a)
             {
                 string temp = a.Message;
                 if (a.InnerException != null)
@@ -59,14 +57,6 @@ namespace WarframeMarketOverlay
           
         }
 
-        protected override void WndProc(ref Message m)
-        {//Catches windows message that says our hotkey has been triggered
-
-            if (m.Msg == Hotkeys.Constants.WM_HOTKEY_MSG_ID)
-                HandleHotkey();
-            base.WndProc(ref m);
-        }   //Message loop that detects the hotkey
-
         private void GlobalHotkeyListener_FormClosing(object sender, FormClosingEventArgs e)
         {//Unregisters the hotkey and hides the tray icon
 
@@ -82,32 +72,13 @@ namespace WarframeMarketOverlay
                 trayIcon.Dispose();
         }
 
-        private void RegisterTriggerKey(Keys key, int mod = Constants.NOMOD)
-        {
-            try
-            {
-                mainTrigger = new GlobalHotkey(mod, key, this);
-                mainTrigger.Register();
-            }
-            catch (GlobalHotkeyException e)
-            {
-                MessageBox.Show(e.Message,"Registration Error");
-                this.BeginInvoke(new MethodInvoker(Close));
-            }
-        }
+        protected override void WndProc(ref Message m)
+        {//Catches windows message that says our hotkey has been triggered
 
-        private void UnRegisterTriggerKey()
-        { 
-            try
-            {
-                if (mainTrigger != null)
-                    mainTrigger.Unregister();
-            }
-            catch (GlobalHotkeyException e)
-            {
-                MessageBox.Show(e.Message, "Registration Error");
-            }
-        }
+            if (m.Msg == Hotkeys.Constants.WM_HOTKEY_MSG_ID)
+                HandleHotkey();
+            base.WndProc(ref m);
+        }   //Message loop that detects the hotkey
 
         private void HandleHotkey()
         {//Handles the hotkey (and does necessary checks)
@@ -127,6 +98,40 @@ namespace WarframeMarketOverlay
             }
         }
 
+        private void RegisterTriggerKey(Keys key, int mod = Constants.NOMOD)
+        {
+            try
+            {
+                if (mainTrigger == null)
+                {
+                    mainTrigger = new GlobalHotkey(mod, key, this);
+                    mainTrigger.Register();
+                }
+                else if (!mainTrigger.IsRegistered())
+                {
+                    mainTrigger.Register();
+                }
+            }
+            catch (GlobalHotkeyException e)
+            {
+                MessageBox.Show(e.Message,"Registration Error");
+                this.BeginInvoke(new MethodInvoker(Close));
+            }
+        }
+
+        private void UnRegisterTriggerKey()
+        { 
+            try
+            {
+                if (mainTrigger != null && mainTrigger.IsRegistered())
+                    mainTrigger.Unregister();
+            }
+            catch (GlobalHotkeyException e)
+            {
+                MessageBox.Show(e.Message, "Registration Error");
+            }
+        }
+
         private void WarframeIsRunning(Process warframe)
         {
             try
@@ -136,7 +141,6 @@ namespace WarframeMarketOverlay
                 warframeProcess.EnableRaisingEvents = true;
 
                 queryHandler = new WarframeQueryHandler();
-                processDetector = null;
 
                 if (this.InvokeRequired)    //Registers the hotkey
                 {
@@ -156,20 +160,31 @@ namespace WarframeMarketOverlay
         }   //called if Warframe has been detected
 
         private void TargetProcess_Exited(object sender, EventArgs e)
-        {//Exits the application when it's linked process closes
-            
-            if (this.InvokeRequired)
+        {
+            if (Properties.Settings.Default.Exit_with_app)
             {
-                this.Invoke(new MethodInvoker(delegate { MessageBox.Show(this, "Warframe and the application will close.", "Warframe Market Overlay"); }));
-                this.Invoke(new MethodInvoker(delegate { this.Close(); }));
+                if (this.InvokeRequired)
+                {
+                    this.Invoke(new MethodInvoker(delegate { MessageBox.Show(this, "Warframe and the application will close.", "Warframe Market Overlay"); }));
+                    this.Invoke(new MethodInvoker(delegate { this.Close(); }));
+                }
+                else
+                {
+                    MessageBox.Show(this, "Warframe and the application will close.", "Warframe Market Overlay");
+                    this.Close();
+                }
             }
             else
             {
-                MessageBox.Show(this, "Warframe and the application will close.", "Warframe Market Overlay");
-                this.Close();
+                warframeProcess.EnableRaisingEvents = false;
+                warframeProcess.Exited -= TargetProcess_Exited;
+                warframeProcess = null;
+                queryHandler = null;
+
+                trayIcon.SetTextFailure();
+                processDetector.Start();
             }
-                
-        }   //Called when Warframe is closing, rework to allow to stay open
+        }   //Called when Warframe is closing
 
     }
 }

@@ -3,21 +3,21 @@ using System.Windows.Forms;
 
 namespace WarframeMarketOverlay
 {
-    class SystemTrayIconException : Exception
+    class WarframeTrayIconException : Exception
     {
-        public SystemTrayIconException() { }
+        public WarframeTrayIconException() { }
 
-        public SystemTrayIconException(string message) : base(message) { }
+        public WarframeTrayIconException(string message) : base(message) { }
 
-        public SystemTrayIconException(string message, Exception inner) : base(message, inner) { }
+        public WarframeTrayIconException(string message, Exception inner) : base(message, inner) { }
     }
 
-    class SystemTrayIcon : IDisposable
+    class WarframeTrayIcon : IDisposable
     {
         private NotifyIcon systemTrayIcon;
         private Form relatedForm;
 
-        public SystemTrayIcon(Form form)
+        public WarframeTrayIcon(Form form)
         {
             systemTrayIcon = null;
             relatedForm = form;
