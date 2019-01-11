@@ -88,7 +88,7 @@ namespace WarframeMarketOverlay
                 if (ForegroundWindow.IsInFocus(warframeProcess.MainWindowHandle) && queryHandler != null)
                     queryHandler.Execute();
             }
-            catch (QueryHandlerException e)
+            catch (WarframeQueryHandlerException e)
             {
                 string temp = e.Message;
                 if (e.InnerException != null)

@@ -7,11 +7,11 @@ using System.Threading.Tasks;
 
 namespace WarframeMarketOverlay
 {
-    class QueryHandlerException : Exception
+    class WarframeQueryHandlerException : Exception
     {
-        public QueryHandlerException() { }
-        public QueryHandlerException(string message) : base(message) { }
-        public QueryHandlerException(string message, Exception inner) : base(message, inner) { }
+        public WarframeQueryHandlerException() { }
+        public WarframeQueryHandlerException(string message) : base(message) { }
+        public WarframeQueryHandlerException(string message, Exception inner) : base(message, inner) { }
     }
 
     class WarframeQueryHandler : IDisposable
@@ -42,31 +42,30 @@ namespace WarframeMarketOverlay
                     CreateNoWindow = true
                 }
             };
-            cancellationTokenSource = new CancellationTokenSource();
+            
             screenReader.EnableRaisingEvents = true;
             screenReader.OutputDataReceived += reader_OutputDataReceived;
             screenReader.Exited += reader_Exited;
             screenReader.ErrorDataReceived += reader_ErrorDataReceived;
+
             itemCount = 0;
         }
 
-        private /*async*/ void reader_OutputDataReceived(object sender, DataReceivedEventArgs e)
+        private void reader_OutputDataReceived(object sender, DataReceivedEventArgs e)
         {
             if (e.Data != null)
             {
                 if (e.Data != "Done")
                 {
-                    itemCount++;
+                    Interlocked.Increment(ref itemCount);
                     tasks.Add(Task.Run(() => HandleResult(e.Data), cancellationTokenSource.Token));
-                    //await temp;
-                    //tasks.Remove(temp);
                 }
                 else
                 {
                     doneReceiving = true;
                     screenReader.CancelOutputRead();
                     if (itemCount == 0)
-                        Cleanup();
+                        Dispose();
                 }
             }  
         }
@@ -80,17 +79,17 @@ namespace WarframeMarketOverlay
                 {
                     var response = await client.GetAsync("https://api.warframe.market/v1/items/" + s + "/orders");
                     var responseObject = await response.Content.ReadAsAsync<Result>();
+                    System.Windows.Forms.MessageBox.Show(s + ' ' + responseObject.GetLowestSellPrice().ToString());
                     response.Dispose();
 
                     cancellationTokenSource.Token.ThrowIfCancellationRequested();
-                    itemCount--;
+                    //itemCount--;
+                    Interlocked.Decrement(ref itemCount);
                     if (itemCount == 0 && doneReceiving)
-                    {
-                        //System.Threading.Thread.Sleep(200);
-                        //if (itemCount == 0)
-                        Cleanup();
+                    {                        
+                        Dispose();
                     }
-                    System.Windows.Forms.MessageBox.Show(s + ' ' + responseObject.GetLowestSellPrice().ToString());
+                    
                 }
             }
             catch (TaskCanceledException e)
@@ -120,32 +119,22 @@ namespace WarframeMarketOverlay
             
         }
 
-        private void Cleanup()
-        {
-            KeyPressed = false;
-            if (client != null)
-            {
-                client.Dispose();
-                client = null;
-            }
-            System.Windows.Forms.MessageBox.Show("end");
-        }
-
         public async void Dispose()
         {
             KeyPressed = false;
             cancellationTokenSource.Cancel();
+            cancellationTokenSource = null;
+            client.CancelPendingRequests();
             if (tasks != null)
             {
                 await Task.WhenAll(tasks);
+                tasks = null;
             }
             if (client != null)
             {
                 client.Dispose();
                 client = null;
             }
-            if (screenReader != null)
-                screenReader.Dispose();
             GC.SuppressFinalize(this);
         }
 
@@ -160,17 +149,28 @@ namespace WarframeMarketOverlay
         public void Execute()
         {
             if (!KeyPressed)
-            {
-                KeyPressed = true;
-                doneReceiving = false;
-                client = new HttpClient
+                try
                 {
-                    BaseAddress = new Uri("https://warframe.market/")
-                };
-                tasks = new List<Task>();
-                screenReader.Start();
-                screenReader.BeginOutputReadLine();
-            }
+                    {
+                        KeyPressed = true;
+                        doneReceiving = false;
+                        client = new HttpClient
+                        {
+                            BaseAddress = new Uri("https://warframe.market/")
+                        };
+                        tasks = new List<Task>();
+                        screenReader.Start();
+                        screenReader.BeginOutputReadLine();
+                        cancellationTokenSource = new CancellationTokenSource();
+                    }
+                }
+                catch (Exception e)
+                {
+                    screenReader.CancelOutputRead();
+                    screenReader.Kill();
+                    Dispose();
+                    throw new WarframeQueryHandlerException("Error at startup",e);
+                }
         }
     }
 }
